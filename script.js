@@ -71,6 +71,28 @@ menuBtn.addEventListener('click', () => {
     }
 });
 
+menuLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent default jump
+        const targetId = link.getAttribute('href');
+        const targetElement = document.querySelector(targetId);
+        
+        // 1. Close the menu
+        isMenuOpen = false;
+        menuBtn.innerHTML = '<i data-lucide="menu"></i>';
+        lucide.createIcons();
+        lenis.start();
+        tlMenu.reverse();
+        
+        // 2. Smooth scroll to target using Lenis after a short delay
+        if (targetElement) {
+            setTimeout(() => {
+                lenis.scrollTo(targetElement, { duration: 1.5, offset: -50 });
+            }, 600); // Wait until the menu overlay is mostly gone
+        }
+    });
+});
+
 links.forEach(link => {
     link.addEventListener('mouseenter', () => follower.classList.add('hover'));
     link.addEventListener('mouseleave', () => follower.classList.remove('hover'));
