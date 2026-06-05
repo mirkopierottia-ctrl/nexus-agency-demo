@@ -346,16 +346,22 @@ window.addEventListener('load', () => {
         }
     });
     
-    // 3. Curtain Reveal Footer Logic
-    // Make the footer visible ONLY when the .cta section covers the screen
-    // This prevents the footer from being seen through transparent sections
-    ScrollTrigger.create({
-        trigger: ".cta",
-        start: "top 20%", // Changed from "top center" to fix the green bar bug (footer is 60vh, needs CTA to cover at least 60% of bottom screen)
-        end: "bottom top", 
-        onEnter: () => gsap.set('.reveal-footer', { visibility: 'visible' }),
-        onLeaveBack: () => gsap.set('.reveal-footer', { visibility: 'hidden' })
-    });
+    // 3. Parallax Curtain Reveal Footer Logic
+    // This is a much more robust way to do a curtain reveal without z-index bugs
+    // We physically place the footer at the bottom, and use parallax to make it slide out
+    gsap.fromTo('.footer-inner', 
+        { yPercent: -50 }, 
+        { 
+            yPercent: 0, 
+            ease: "none", 
+            scrollTrigger: {
+                trigger: ".reveal-footer",
+                start: "top bottom", // Starts when the top of the footer enters the bottom of the screen
+                end: "bottom bottom", // Ends when the footer is fully in view
+                scrub: true
+            }
+        }
+    );
     
     // 4. Fade up elements
     const fadeUps = document.querySelectorAll('.fade-up');

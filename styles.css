@@ -517,21 +517,21 @@ html, body {
     color: black;
 }
 
-.footer-spacer {
-    height: 60vh;
+.reveal-footer {
+    position: relative;
     width: 100%;
-    pointer-events: none;
+    height: 60vh;
+    background: var(--bg-color); /* Matches bottom of cta */
+    overflow: hidden;
 }
 
-.reveal-footer {
-    position: fixed;
+.footer-inner {
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
     height: 60vh;
     background: var(--accent-color);
-    z-index: 0; /* In front of canvas (-1), behind cta (10) */
-    visibility: hidden; /* Hidden until CTA covers it */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
