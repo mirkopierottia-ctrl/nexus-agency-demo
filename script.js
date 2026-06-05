@@ -79,7 +79,7 @@ links.forEach(link => {
 // Hover Media Reveal Logic
 const mediaContainer = document.querySelector('.hover-media-container');
 const mediaImg = document.querySelector('.hover-media-img');
-const serviceItems = document.querySelectorAll('.service-item');
+const hoverTriggerItems = document.querySelectorAll('.service-item, .menu-link');
 
 let mediaTargetX = 0, mediaTargetY = 0;
 
@@ -94,7 +94,7 @@ gsap.ticker.add(() => {
     gsap.set(mediaContainer, { x: mediaTargetX, y: mediaTargetY });
 });
 
-serviceItems.forEach(item => {
+hoverTriggerItems.forEach(item => {
     item.addEventListener('mouseenter', (e) => {
         const imgSrc = item.getAttribute('data-image');
         if(imgSrc) {
