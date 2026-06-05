@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="NEXUS Agency - We shape the digital frontier. Premium web development and creative branding.">
+    <title>NEXUS | Creative Advertising Agency</title>
+    
+    <!-- Google Fonts: Inter (Clean) and Syne (Brutalist/Wide) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <!-- Split Screen Loader -->
+    <div id="loader">
+        <div class="loader-bg top"></div>
+        <div class="loader-bg bottom"></div>
+        <div class="loader-content">
+            <h1 class="loader-logo">NEXUS</h1>
+            <p class="loader-slogan">ENTER THE VOID</p>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Background -->
+    <div id="canvas-container"></div>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <a href="#" class="logo">NEXUS.</a>
+        <div class="nav-links">
+            <a href="#">Work</a>
+            <a href="#">Studio</a>
+            <a href="#">Contact</a>
+        </div>
+        <button class="nav-btn"><i data-lucide="menu"></i></button>
+    </nav>
+
+    <!-- Fullscreen Menu Overlay -->
+    <div class="menu-overlay">
+        <div class="menu-container">
+            <nav class="menu-nav">
+                <div class="menu-link-wrapper"><a href="#" class="menu-link">WORK</a></div>
+                <div class="menu-link-wrapper"><a href="#" class="menu-link">STUDIO</a></div>
+                <div class="menu-link-wrapper"><a href="#" class="menu-link">SERVICES</a></div>
+                <div class="menu-link-wrapper"><a href="#" class="menu-link">CONTACT</a></div>
+            </nav>
+            <div class="menu-footer">
+                <div class="menu-info">
+                    <span>SAY HELLO</span>
+                    <p>hello@nexus.agency</p>
+                </div>
+                <div class="menu-socials">
+                    <a href="#">TWITTER</a>
+                    <a href="#">INSTAGRAM</a>
+                    <a href="#">LINKEDIN</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scroll Container (Lenis) -->
+    <div class="scroll-content">
+        
+        <!-- Marquee Background -->
+        <div class="marquee-container">
+            <div class="marquee-content">
+                <span>CREATIVE. DIGITAL. UNSEEN. </span>
+                <span>CREATIVE. DIGITAL. UNSEEN. </span>
+                <span>CREATIVE. DIGITAL. UNSEEN. </span>
+                <span>CREATIVE. DIGITAL. UNSEEN. </span>
+            </div>
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-foreground">
+                <h1 class="reveal-text">SHAPE THE</h1>
+                <h1 class="reveal-text outline">UNSEEN.</h1>
+                <p class="subtitle fade-up">We are a creative advertising agency building digital experiences that demand attention.</p>
+            </div>
+            
+            <div class="scroll-indicator">
+                <span class="scroll-text">DISCOVER</span>
+                <i data-lucide="arrow-down" class="scroll-icon"></i>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section class="services">
+            <div class="service-block">
+                <h2 class="section-title fade-up">OUR EXPERTISE</h2>
+                <div class="service-item fade-up" data-image="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop">
+                    <span class="service-number">01</span>
+                    <h3>Digital Branding</h3>
+                    <p>Crafting bold identities that resonate in a saturated market.</p>
+                </div>
+                <div class="service-item fade-up" data-image="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2000&auto=format&fit=crop">
+                    <span class="service-number">02</span>
+                    <h3>Immersive Web</h3>
+                    <p>WebGL and GSAP experiences that convert visitors into believers.</p>
+                </div>
+                <div class="service-item fade-up" data-image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000&auto=format&fit=crop">
+                    <span class="service-number">03</span>
+                    <h3>Campaign Strategy</h3>
+                    <p>Data-driven narratives that dominate the conversation.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section class="cta">
+            <h2 class="huge-text fade-up">LET'S TALK</h2>
+            <div class="magnetic-wrap fade-up">
+                <a href="mailto:mirkopierottia@gmail.com" class="magnetic-btn">START A PROJECT <i data-lucide="arrow-up-right"></i></a>
+            </div>
+        </section>
+        
+        <footer class="footer">
+            <p>&copy; 2026 NEXUS Agency. All rights reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- Hover Media Reveal -->
+    <div class="hover-media-container">
+        <img src="" alt="" class="hover-media-img">
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.27/bundled/lenis.min.js"></script>
+    
+    <!-- Main Script -->
+    <script src="script.js"></script>
+</body>
+</html>
