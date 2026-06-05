@@ -346,7 +346,18 @@ window.addEventListener('load', () => {
         }
     });
     
-    // 3. Fade up elements
+    // 3. Curtain Reveal Footer Logic
+    // Make the footer visible ONLY when the .cta section covers the screen
+    // This prevents the footer from being seen through transparent sections
+    ScrollTrigger.create({
+        trigger: ".cta",
+        start: "top center", // Trigger when the solid CTA background covers enough of the screen
+        end: "bottom top", 
+        onEnter: () => gsap.set('.reveal-footer', { visibility: 'visible' }),
+        onLeaveBack: () => gsap.set('.reveal-footer', { visibility: 'hidden' })
+    });
+    
+    // 4. Fade up elements
     const fadeUps = document.querySelectorAll('.fade-up');
     fadeUps.forEach(elem => {
         gsap.fromTo(elem, 
