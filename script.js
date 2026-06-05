@@ -15,6 +15,15 @@ document.addEventListener('mousemove', (e) => {
     
     // Instant update for the dot
     gsap.to(cursor, { x: mouseX, y: mouseY, duration: 0 });
+
+    // Update Spotlight mask position for Studio Modal
+    const studioModal = document.querySelector('.studio-modal');
+    if (studioModal && studioModal.style.visibility === 'visible') {
+        const xDecimal = (mouseX / window.innerWidth) * 100;
+        const yDecimal = (mouseY / window.innerHeight) * 100;
+        studioModal.style.setProperty('--mouse-x', `${xDecimal}%`);
+        studioModal.style.setProperty('--mouse-y', `${yDecimal}%`);
+    }
 });
 
 // Smooth follow loop
@@ -75,20 +84,67 @@ menuLinks.forEach(link => {
     link.addEventListener('click', (e) => {
         e.preventDefault(); // Prevent default jump
         const targetId = link.getAttribute('href');
-        const targetElement = document.querySelector(targetId);
         
         // 1. Close the menu
         isMenuOpen = false;
         menuBtn.innerHTML = '<i data-lucide="menu"></i>';
         lucide.createIcons();
-        lenis.start();
         tlMenu.reverse();
+
+        // 2. SPECIAL CASE: STUDIO STORYTELLING MODAL
+        if (targetId === '#studio') {
+            openStudioModal();
+            return; // Stop here, don't scroll
+        }
+
+        const targetElement = document.querySelector(targetId);
         
-        // 2. Smooth scroll to target using Lenis after a short delay
+        // 3. Smooth scroll to target using Lenis after a short delay
         if (targetElement) {
+            lenis.start();
             setTimeout(() => {
                 lenis.scrollTo(targetElement, { duration: 1.5, offset: -50 });
             }, 600); // Wait until the menu overlay is mostly gone
+        }
+    });
+});
+
+// --- STUDIO STORYTELLING MODAL LOGIC ---
+const studioModal = document.querySelector('.studio-modal');
+const closeStudioBtn = document.querySelector('.close-studio');
+const studioLines = document.querySelectorAll('.studio-line');
+
+function openStudioModal() {
+    lenis.stop(); // Lock scroll
+    
+    gsap.to(studioModal, {
+        visibility: 'visible',
+        opacity: 1,
+        duration: 1,
+        ease: 'power3.out'
+    });
+
+    gsap.fromTo(studioLines, 
+        { y: 50, opacity: 0 },
+        { 
+            y: 0, 
+            opacity: 1, 
+            duration: 1.5, 
+            stagger: 0.3, 
+            ease: 'expo.out',
+            delay: 0.5 // Wait for modal background to fade in
+        }
+    );
+}
+
+closeStudioBtn.addEventListener('click', () => {
+    gsap.to(studioModal, {
+        opacity: 0,
+        duration: 0.8,
+        ease: 'power2.inOut',
+        onComplete: () => {
+            gsap.set(studioModal, { visibility: 'hidden' });
+            lenis.start(); // Unlock scroll
         }
     });
 });
