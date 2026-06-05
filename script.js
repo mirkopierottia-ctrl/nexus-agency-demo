@@ -351,7 +351,7 @@ window.addEventListener('load', () => {
     // This prevents the footer from being seen through transparent sections
     ScrollTrigger.create({
         trigger: ".cta",
-        start: "top center", // Trigger when the solid CTA background covers enough of the screen
+        start: "top 20%", // Changed from "top center" to fix the green bar bug (footer is 60vh, needs CTA to cover at least 60% of bottom screen)
         end: "bottom top", 
         onEnter: () => gsap.set('.reveal-footer', { visibility: 'visible' }),
         onLeaveBack: () => gsap.set('.reveal-footer', { visibility: 'hidden' })
