@@ -192,8 +192,6 @@ html, body {
     flex-direction: column;
     justify-content: center;
     height: 100%;
-    position: relative;
-    z-index: 98;
 }
 
 .menu-nav {
@@ -202,14 +200,8 @@ html, body {
     gap: 1rem;
 }
 
-.menu-nav:hover .menu-link {
-    opacity: 0.2;
-}
-
 .menu-link-wrapper {
     overflow: hidden;
-    padding: 10px 0; /* Extra padding to prevent clipping when skewed */
-    margin: -10px 0;
 }
 
 .menu-link {
@@ -222,15 +214,17 @@ html, body {
     line-height: 0.9;
     display: block;
     transform: translateY(100%); /* Hidden state */
-    transition: color 0.4s ease, opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-    transform-origin: left center;
+    transition: color 0.3s, -webkit-text-stroke 0.3s;
 }
 
-.menu-nav .menu-link:hover {
-    opacity: 1;
-    color: var(--accent-color);
-    text-shadow: none;
-    transform: translate(40px, 0%) skewX(-8deg) !important;
+.menu-link:hover {
+    color: var(--bg-color);
+    text-shadow: 
+        -2px -2px 0 var(--accent-color),  
+         2px -2px 0 var(--accent-color),
+        -2px  2px 0 var(--accent-color),
+         2px  2px 0 var(--accent-color);
+    /* Removed -webkit-text-stroke to fix overlapping font geometry */
 }
 
 .menu-footer {
@@ -450,7 +444,7 @@ html, body {
     border-radius: 20px;
     overflow: hidden;
     pointer-events: none;
-    z-index: 95; /* Behind menu text (98), but in front of menu background (90) */
+    z-index: 50;
     opacity: 0;
     transform: translateY(-50%) scale(0.8);
 }
