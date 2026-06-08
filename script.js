@@ -236,93 +236,142 @@ lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((time) => { lenis.raf(time * 1000); });
 gsap.ticker.lagSmoothing(0);
 
-// --- Three.js Abstract 3D Scene ---
+// --- Three.js Abstract 3D Scene (Raymarching) ---
 const canvasContainer = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x050505, 0.05);
 
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.z = 12;
-
+const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 canvasContainer.appendChild(renderer.domElement);
 
-// Create Abstract Geometry (Liquid Metal Blob)
-const geometry = new THREE.SphereGeometry(3, 64, 64);
+const fragmentShader = `
+uniform float uTime;
+uniform vec2 uResolution;
+uniform vec2 uMouse;
+uniform vec3 uOffset;
+uniform float uScale;
 
-// Store original vertices for animation
-const positionAttribute = geometry.getAttribute('position');
-const vertexData = [];
-for (let i = 0; i < positionAttribute.count; i++) {
-    vertexData.push({
-        x: positionAttribute.getX(i),
-        y: positionAttribute.getY(i),
-        z: positionAttribute.getZ(i)
-    });
+float sdSphere(vec3 p, float s) { return length(p) - s; }
+float smin(float a, float b, float k) {
+    float h = clamp(0.5 + 0.5 * (b - a) / k, 0.0, 1.0);
+    return mix(b, a, h) - k * h * (1.0 - h);
+}
+mat2 rot(float a) {
+    float s = sin(a), c = cos(a);
+    return mat2(c, -s, s, c);
 }
 
-const material = new THREE.MeshStandardMaterial({
-    color: 0xccff00, // Acid Green
-    metalness: 0.9,
-    roughness: 0.1,
-    wireframe: true
+float map(vec3 p) {
+    p -= uOffset;
+    p /= max(uScale, 0.01);
+    
+    vec3 p1 = p, p2 = p, p3 = p;
+    p1.xz *= rot(uTime * 0.5); p1.x += sin(uTime) * 1.5;
+    p2.xy -= uMouse * 3.0; p2.z += cos(uTime) * 0.5;
+    p3.xy *= rot(-uTime * 0.4); p3.x += cos(uTime) * 2.0;
+
+    float s1 = sdSphere(p1, 1.2);
+    float s2 = sdSphere(p2, 1.0);
+    float s3 = sdSphere(p3, 0.8);
+    float core = sdSphere(p, 1.5);
+
+    float d = smin(core, s1, 0.8);
+    d = smin(d, s2, 0.8);
+    d = smin(d, s3, 0.8);
+    return d * uScale;
+}
+
+vec3 calcNormal(vec3 p) {
+    const float eps = 0.001;
+    const vec2 h = vec2(eps, 0);
+    return normalize(vec3(
+        map(p + h.xyy) - map(p - h.xyy),
+        map(p + h.yxy) - map(p - h.yxy),
+        map(p + h.yyx) - map(p - h.yyx)
+    ));
+}
+
+void main() {
+    vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution.xy) / min(uResolution.y, uResolution.x);
+    vec3 ro = vec3(0.0, 0.0, 6.0);
+    vec3 rd = normalize(vec3(uv, -1.0));
+    
+    float t = 0.0;
+    vec3 col = vec3(0.0);
+    float alpha = 0.0;
+    
+    for(int i = 0; i < 80; i++) {
+        vec3 p = ro + rd * t;
+        float d = map(p);
+        
+        if(d < 0.001) {
+            vec3 n = calcNormal(p);
+            float fresnel = pow(1.0 - max(dot(n, -rd), 0.0), 3.0);
+            vec3 lightDir = normalize(vec3(1.0, 1.0, 1.0));
+            float diff = max(dot(n, lightDir), 0.0);
+            
+            // Aberración Cromática ajustada al tono Verde Ácido (#ccff00)
+            vec3 crystalColor = vec3(
+                smoothstep(0.0, 1.0, fresnel * 1.5) * 0.8, // Red (moderate)
+                smoothstep(0.0, 1.0, fresnel * 2.0) * 1.0, // Green (high)
+                smoothstep(0.0, 1.0, fresnel * 0.5) * 0.0  // Blue (none)
+            );
+            
+            col = vec3(0.05) + crystalColor * 1.5 + diff * 0.1;
+            alpha = 1.0;
+            break;
+        }
+        if(t > 20.0) break;
+        t += d;
+    }
+    
+    // Viñeta para darle un toque más oscuro
+    col *= 1.0 - 0.5 * length(uv);
+    
+    gl_FragColor = vec4(col, alpha);
+}
+`;
+
+const vertexShader = `
+void main() {
+    gl_Position = vec4(position, 1.0);
+}
+`;
+
+const uniforms = {
+    uTime: { value: 0 },
+    uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    uMouse: { value: new THREE.Vector2(0, 0) },
+    uOffset: { value: new THREE.Vector3(0, 0, 0) },
+    uScale: { value: 1.0 }
+};
+
+const material = new THREE.ShaderMaterial({
+    vertexShader,
+    fragmentShader,
+    uniforms,
+    transparent: true
 });
-const abstractMesh = new THREE.Mesh(geometry, material);
-scene.add(abstractMesh);
 
-// Lighting
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-scene.add(ambientLight);
+const geometry = new THREE.PlaneGeometry(2, 2);
+const raymarchingMesh = new THREE.Mesh(geometry, material);
+scene.add(raymarchingMesh);
 
-const pointLight = new THREE.PointLight(0xffffff, 2);
-pointLight.position.set(5, 5, 5);
-scene.add(pointLight);
-
-// Handle Resize
 window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
+    uniforms.uResolution.value.set(window.innerWidth, window.innerHeight);
 });
 
-// 3D Animation Loop
 const clock = new THREE.Clock();
 function animate3D() {
     requestAnimationFrame(animate3D);
-    const elapsedTime = clock.getElapsedTime();
+    uniforms.uTime.value = clock.getElapsedTime();
     
-    // Slow continuous rotation
-    abstractMesh.rotation.x = elapsedTime * 0.1;
-    abstractMesh.rotation.y = elapsedTime * 0.15;
-    
-    // Liquid Blob Vertex Animation
-    const positionAttr = abstractMesh.geometry.getAttribute('position');
-    for (let i = 0; i < positionAttr.count; i++) {
-        const p = vertexData[i];
-        // Mathematical fluid noise (amplified for more deformation)
-        const noise = 1.0 * Math.sin(p.x * 1.5 + elapsedTime * 1.5) + 
-                      1.0 * Math.sin(p.y * 1.5 + elapsedTime * 1.5) + 
-                      1.0 * Math.sin(p.z * 1.5 + elapsedTime * 1.5);
-        
-        // Secondary high-frequency ripple
-        const noise2 = 0.5 * Math.sin(p.x * 4 + elapsedTime * 2);
-        
-        // Push vertices outwards (amplified)
-        const scale = 1 + (noise + noise2) * 0.3; 
-        
-        positionAttr.setXYZ(i, p.x * scale, p.y * scale, p.z * scale);
-    }
-    positionAttr.needsUpdate = true;
-    abstractMesh.geometry.computeVertexNormals();
-    
-    // Parallax mouse effect
-    const targetRotX = (mouseY / window.innerHeight - 0.5) * 0.5;
-    const targetRotY = (mouseX / window.innerWidth - 0.5) * 0.5;
-    
-    scene.rotation.x += (targetRotX - scene.rotation.x) * 0.05;
-    scene.rotation.y += (targetRotY - scene.rotation.y) * 0.05;
+    // Suavizado del mouse con lerp manual
+    uniforms.uMouse.value.x += ((mouseX / window.innerWidth - 0.5) * 2.0 - uniforms.uMouse.value.x) * 0.05;
+    uniforms.uMouse.value.y += (-(mouseY / window.innerHeight - 0.5) * 2.0 - uniforms.uMouse.value.y) * 0.05;
 
     renderer.render(scene, camera);
 }
@@ -361,8 +410,8 @@ window.addEventListener('load', () => {
         ease: "power4.out" 
     }, "-=0.5")
     .from('.subtitle', { opacity: 0, y: 20, duration: 1 }, "-=0.5")
-    .from(abstractMesh.scale, { 
-        x: 0, y: 0, z: 0, 
+    .from(uniforms.uScale, { 
+        value: 0, 
         duration: 1.5, 
         ease: "elastic.out(1, 0.5)",
         onComplete: initScrollTriggers
@@ -401,9 +450,9 @@ window.addEventListener('load', () => {
         }
 
         // Scroll Animations
-        // 1. Move 3D object to the side during services section
-    gsap.to(abstractMesh.position, {
-        x: 4,
+        // 1. Mover la esfera líquida hacia la derecha usando uOffset
+    gsap.to(uniforms.uOffset.value, {
+        x: 2.2, // Adjusted from 4 to keep it more to the left
         ease: "power1.inOut",
         scrollTrigger: {
             trigger: ".services",
@@ -413,9 +462,9 @@ window.addEventListener('load', () => {
         }
     });
 
-    // 2. Change 3D object color or scale
-    gsap.to(abstractMesh.scale, {
-        x: 0.5, y: 0.5, z: 0.5,
+    // 2. Reducir el tamaño de las metaballs usando uScale
+    gsap.to(uniforms.uScale, {
+        value: 0.5,
         scrollTrigger: {
             trigger: ".cta",
             start: "top bottom",
